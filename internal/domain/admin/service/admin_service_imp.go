@@ -78,6 +78,26 @@ func (s adminServiceImp) Delete(adminId int) error {
 	return s.adminRepo.Delete(admin.ID)
 }
 
+func (s adminServiceImp) UpdateAdminPassword(adminId int, changePasswordRequest dto.ChangeAdminPassword) error {
+
+	admin, err := s.adminRepo.GetOneById(adminId)
+	if err != nil {
+		return err
+	}
+	if admin == nil {
+		return errors.New("admin not found")
+	}
+
+	if !utils.CheckPasswordHash(changePasswordRequest.OldPassword, admin.PasswordHash) {
+		return errors.New("old password is incorrect")
+	}
+	if changePasswordRequest.Password != changePasswordRequest.ConfirmPassword {
+		return errors.New("new password and confirmation do not match")
+	}
+	newPasswordHash := utils.HashPassword(changePasswordRequest.Password)
+	return s.adminRepo.UpdateAdminPassword(admin.ID, newPasswordHash)
+}
+
 func validateUniqueEmail(email string, adminId int, repo repository.AdminRepository) error {
 	existingAdmin, err := repo.GetAdminByEmail(email)
 	if err != nil {

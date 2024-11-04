@@ -12,7 +12,7 @@ type UpdateAdminRequest struct {
 }
 
 type ChangeAdminPassword struct {
-	OldPassword     string `json:"old_password"`
-	Password        string `json:"password_hash"`
-	ConfirmPassword string `json:"confirm_password"`
+	OldPassword     string `json:"old_password" validate:"required"`
+	Password        string `json:"password" validate:"required,min=6"`
+	ConfirmPassword string `json:"confirm_password" validate:"required,eqfield=Password"`
 }

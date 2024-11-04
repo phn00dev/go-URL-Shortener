@@ -114,3 +114,21 @@ func (adminHandler adminHandlerImp) Delete(c *gin.Context) {
 	}
 	response.Success(c, http.StatusOK, "Admin deleted successfully", nil)
 }
+
+func (adminHandler adminHandlerImp) UpdateAdminPassword(c *gin.Context) {
+	adminIdStr := c.Param("adminId")
+	adminId, _ := strconv.Atoi(adminIdStr)
+
+	var changePasswordRequest dto.ChangeAdminPassword
+	if err := c.ShouldBindJSON(&changePasswordRequest); err != nil {
+		response.Error(c, http.StatusBadRequest, "data parsing error", err.Error())
+		return
+	}
+
+	err := adminHandler.adminService.UpdateAdminPassword(adminId, changePasswordRequest)
+	if err != nil {
+		response.Error(c, http.StatusConflict, "password update failed", err.Error())
+		return
+	}
+	response.Success(c, http.StatusOK, "password updated successfully", nil)
+}

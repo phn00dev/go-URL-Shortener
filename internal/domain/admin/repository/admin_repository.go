@@ -8,4 +8,7 @@ type AdminRepository interface {
 	Create(admin model.Admin) error
 	Update(adminId int, admin model.Admin) error
 	Delete(adminId int) error
+	GetAdminByEmail(email string) (*model.Admin, error)
+	GetAdminByUsername(username string) (*model.Admin, error)
+	UpdateAdminPassword(adminId int, password string) error
 }

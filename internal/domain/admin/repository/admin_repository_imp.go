@@ -44,3 +44,29 @@ func (adminRepo adminRepositoryImp) Update(adminId int, admin model.Admin) error
 func (adminRepo adminRepositoryImp) Delete(adminId int) error {
 	return adminRepo.db.Delete(&model.Admin{}, adminId).Error
 }
+
+func (adminRepo adminRepositoryImp) GetAdminByEmail(email string) (*model.Admin, error) {
+	var admin model.Admin
+	err := adminRepo.db.Where("email=?", email).First(&admin).Error
+	if err != nil {
+		return nil, err
+	}
+	return &admin, nil
+}
+
+func (adminRepo adminRepositoryImp) GetAdminByUsername(username string) (*model.Admin, error) {
+	var admin model.Admin
+	err := adminRepo.db.Where("username=?", username).First(&admin).Error
+	if err != nil {
+		return nil, err
+	}
+	return &admin, nil
+}
+
+func (adminRepo adminRepositoryImp) UpdateAdminPassword(adminId int, password string) error {
+	// Update the password for the admin with the specified ID
+	if err := adminRepo.db.Model(&model.Admin{}).Where("id = ?", adminId).Update("password", password).Error; err != nil {
+		return err // Return the error if there is an issue
+	}
+	return nil // Return nil if the update was successful
+}
