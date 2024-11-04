@@ -14,7 +14,7 @@ func main() {
 		fmt.Println(err)
 		return
 	}
-	constructor.Build(appDependencies)
+	constructor.InitDependencies(appDependencies)
 	appRouter := app.NewApp(appDependencies.Config)
 	runServer := fmt.Sprintf("%s:%s", appDependencies.Config.HttpConfig.HttpHost, appDependencies.Config.HttpConfig.HttpPort)
 	log.Println(runServer)
