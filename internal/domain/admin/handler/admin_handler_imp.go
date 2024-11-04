@@ -9,6 +9,7 @@ import (
 
 	"github.com/phn00dev/go-URL-Shortener/internal/domain/admin/dto"
 	"github.com/phn00dev/go-URL-Shortener/internal/domain/admin/service"
+	"github.com/phn00dev/go-URL-Shortener/internal/utils/response"
 )
 
 type adminHandlerImp struct {
@@ -25,74 +26,91 @@ func NewAdminHandler(service service.AdminService) AdminHandler {
 
 func (adminHandler adminHandlerImp) GetOneById(c *gin.Context) {
 	adminIdStr := c.Param("adminId")
-	adminId, _ := strconv.Atoi(adminIdStr)
-	admin, err := adminHandler.adminService.FindOneById(adminId)
+	adminId, err := strconv.Atoi(adminIdStr)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Admin not found"})
+		response.Error(c, http.StatusBadRequest, "invalid admin ID", err.Error())
 		return
 	}
-	c.JSON(http.StatusOK, admin)
+
+	admin, err := adminHandler.adminService.FindOneById(adminId)
+	if err != nil {
+		response.Error(c, http.StatusNotFound, "Admin not found", err.Error())
+		return
+	}
+
+	response.Success(c, http.StatusOK, "Admin retrieved successfully", admin)
 }
 
 func (adminHandler adminHandlerImp) GetAll(c *gin.Context) {
 	admins, err := adminHandler.adminService.FindAll()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not fetch admins"})
+		response.Error(c, http.StatusInternalServerError, "Could not fetch admins", err.Error())
 		return
 	}
-	c.JSON(http.StatusOK, admins)
+	response.Success(c, http.StatusOK, "Admins retrieved successfully", admins)
 }
 
 func (adminHandler adminHandlerImp) Create(c *gin.Context) {
 	var createRequest dto.CreateAdminRequest
 	if err := c.ShouldBindJSON(&createRequest); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		response.Error(c, http.StatusBadRequest, "data parsing error", err.Error())
 		return
 	}
 
 	// Validate createRequest
 	if err := adminHandler.validator.Struct(createRequest); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		response.Error(c, http.StatusBadRequest, "validation error", err.Error())
 		return
 	}
 
 	err := adminHandler.adminService.Create(createRequest)
 	if err != nil {
-		c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
+		response.Error(c, http.StatusConflict, "admin creation error", err.Error())
 		return
 	}
-	c.JSON(http.StatusCreated, gin.H{"message": "Admin created successfully"})
+	response.Success(c, http.StatusCreated, "Admin created successfully", nil)
 }
 
 func (adminHandler adminHandlerImp) Update(c *gin.Context) {
 	adminIdStr := c.Param("adminId")
-	adminId, _ := strconv.Atoi(adminIdStr)
+	adminId, err := strconv.Atoi(adminIdStr)
+	if err != nil {
+		response.Error(c, http.StatusBadRequest, "invalid admin ID", err.Error())
+		return
+	}
+
 	var updateRequest dto.UpdateAdminRequest
 	if err := c.ShouldBindJSON(&updateRequest); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		response.Error(c, http.StatusBadRequest, "data parsing error", err.Error())
 		return
 	}
 
 	// Validate updateRequest
 	if err := adminHandler.validator.Struct(updateRequest); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		response.Error(c, http.StatusBadRequest, "validation error", err.Error())
 		return
 	}
 
-	err := adminHandler.adminService.Update(adminId, updateRequest)
+	err = adminHandler.adminService.Update(adminId, updateRequest)
 	if err != nil {
-		c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
+		response.Error(c, http.StatusConflict, "admin update error", err.Error())
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "Admin updated successfully"})
+	response.Success(c, http.StatusOK, "Admin updated successfully", nil)
 }
+
 func (adminHandler adminHandlerImp) Delete(c *gin.Context) {
 	adminIdStr := c.Param("adminId")
-	adminId, _ := strconv.Atoi(adminIdStr)
-	err := adminHandler.adminService.Delete(adminId)
+	adminId, err := strconv.Atoi(adminIdStr)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		response.Error(c, http.StatusBadRequest, "invalid admin ID", err.Error())
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "Admin deleted successfully"})
+
+	err = adminHandler.adminService.Delete(adminId)
+	if err != nil {
+		response.Error(c, http.StatusNotFound, "admin not found", err.Error())
+		return
+	}
+	response.Success(c, http.StatusOK, "Admin deleted successfully", nil)
 }
