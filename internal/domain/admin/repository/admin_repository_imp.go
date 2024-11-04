@@ -64,9 +64,8 @@ func (adminRepo adminRepositoryImp) GetAdminByUsername(username string) (*model.
 }
 
 func (adminRepo adminRepositoryImp) UpdateAdminPassword(adminId int, password string) error {
-	// Update the password for the admin with the specified ID
 	if err := adminRepo.db.Model(&model.Admin{}).Where("id = ?", adminId).Update("password", password).Error; err != nil {
-		return err // Return the error if there is an issue
+		return err
 	}
-	return nil // Return nil if the update was successful
+	return nil
 }

@@ -16,4 +16,5 @@ func AdminRoutes(route *gin.Engine) {
 		adminRoute.PUT("/:adminId", adminConstructor.AdminHandler.Update)
 		adminRoute.DELETE("/:adminId", adminConstructor.AdminHandler.Delete)
 	}
+
 }

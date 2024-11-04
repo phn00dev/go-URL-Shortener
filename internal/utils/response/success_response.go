@@ -10,7 +10,7 @@ type successResponse struct {
 }
 
 // SuccessResponse function to return a success response
-func SuccessResponse(c *gin.Context, status int, message string, data any) {
+func Success(c *gin.Context, status int, message string, data any) {
 	c.JSON(status, &successResponse{
 		Status:  status,
 		Message: message,

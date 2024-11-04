@@ -11,4 +11,5 @@ type AdminService interface {
 	Create(createRequst dto.CreateAdminRequest) error
 	Update(adminId int, updateRequest dto.UpdateAdminRequest) error
 	Delete(adminId int) error
+	UpdateAdminPassword(adminId int, changePasswordRequest dto.ChangeAdminPassword) error
 }
