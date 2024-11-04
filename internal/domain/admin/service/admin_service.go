@@ -9,6 +9,6 @@ type AdminService interface {
 	FindOneById(adminId int) (*model.Admin, error)
 	FindAll() ([]model.Admin, error)
 	Create(createRequst dto.CreateAdminRequest) error
-	Update(adminId int, updateRequest dto.UpdateAminRequest) error
+	Update(adminId int, updateRequest dto.UpdateAdminRequest) error
 	Delete(adminId int) error
 }

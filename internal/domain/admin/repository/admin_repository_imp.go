@@ -17,21 +17,30 @@ func NewAdminRepository(db *gorm.DB) AdminRepository {
 }
 
 func (adminRepo adminRepositoryImp) GetOneById(adminId int) (*model.Admin, error) {
-	panic("admin repo imp")
+	var admin model.Admin
+	err := adminRepo.db.First(&admin, adminId).Error
+	if err != nil {
+		return nil, err
+	}
+	return &admin, nil
 }
 
 func (adminRepo adminRepositoryImp) GetAll() ([]model.Admin, error) {
-	panic("admin repo imp")
+	var admins []model.Admin
+	if err := adminRepo.db.Find(&admins).Error; err != nil {
+		return nil, err
+	}
+	return admins, nil
 }
 
 func (adminRepo adminRepositoryImp) Create(admin model.Admin) error {
-	panic("admin repo imp")
+	return adminRepo.db.Create(&admin).Error
 }
 
 func (adminRepo adminRepositoryImp) Update(adminId int, admin model.Admin) error {
-	panic("admin repo imp")
+	return adminRepo.db.Where("id=?", adminId).Updates(&admin).Error
 }
 
 func (adminRepo adminRepositoryImp) Delete(adminId int) error {
-	panic("admin repo imp")
+	return adminRepo.db.Delete(&model.Admin{}, adminId).Error
 }
