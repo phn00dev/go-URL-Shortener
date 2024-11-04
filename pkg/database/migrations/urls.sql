@@ -1,7 +1,9 @@
 CREATE TABLE urls (
     id SERIAL PRIMARY KEY,
-    original_url TEXT NOT NULL,         -- Uzyn URL (başlangyç salgysy)
-    short_url VARCHAR(10) UNIQUE,      -- Gysga URL üçin unikal kod
-    created_at TIMESTAMP DEFAULT NOW(), -- URL-iň döredilen wagty
-    expires_at TIMESTAMP                -- URL-iň möhleti (islege görä)
+    original_url TEXT NOT NULL,        
+    short_url VARCHAR(10) UNIQUE,     
+    user_id int ,
+    click_count int DEFAULT 0,
+    created_at TIMESTAMP DEFAULT NOW(),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
