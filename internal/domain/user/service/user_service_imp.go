@@ -83,6 +83,25 @@ func (s userServiceImp) Delete(userId int) error {
 	return s.userRepo.Delete(user.ID)
 }
 
+func (s userServiceImp) UpdateUserPassword(userId int, updatePasswordRequest dto.UpdateUserPassword) error {
+	user, err := s.userRepo.GetById(userId)
+	if err != nil {
+		return err
+	}
+	if user.ID == 0 {
+		return errors.New("user not found")
+	}
+	if !utils.CheckPasswordHash(updatePasswordRequest.OldPassword, user.PasswordHash) {
+		return errors.New("old password is incorrect")
+	}
+	if updatePasswordRequest.Password != updatePasswordRequest.ConfirmPassword {
+		return errors.New("new password and confirmation do not match")
+	}
+	newPasswordHash := utils.HashPassword(updatePasswordRequest.Password)
+	return s.userRepo.UpdateUserPassword(user.ID, newPasswordHash)
+
+}
+
 func validateUniqueEmail(email string, adminId int, repo repository.UserRepository) error {
 	existingAdmin, err := repo.GetByEmail(email)
 	if err != nil {
