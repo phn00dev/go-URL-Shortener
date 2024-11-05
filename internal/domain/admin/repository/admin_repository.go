@@ -9,6 +9,7 @@ type AdminRepository interface {
 	Update(adminId int, admin model.Admin) error
 	Delete(adminId int) error
 	UpdateAdminPassword(adminId int, password string) error
+	// find
 	FindByUsernameOrEmail(username, email string) (*model.Admin, error)
 	FindByUsernameOrEmailById(adminId int, username, email string) (*model.Admin, error)
 	GetAdminByEmail(email string) (*model.Admin, error)

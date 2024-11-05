@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/phn00dev/go-URL-Shortener/internal/domain/user/dto"
 	"github.com/phn00dev/go-URL-Shortener/internal/domain/user/repository"
@@ -37,14 +38,18 @@ func (s userServiceImp) FindOne(userId int) (*model.User, error) {
 }
 
 func (s userServiceImp) Create(createRequest dto.CreateUserRequest) error {
-	email := createRequest.Email
-	username := createRequest.Username
-	if err := validateUniqueEmailAndUsername(email, username, s.userRepo); err != nil {
+	existingUser, err := s.userRepo.FindByUsernameOrEmail(createRequest.Username, createRequest.Email)
+	if err != nil {
 		return err
 	}
+
+	if existingUser != nil {
+		return errors.New("username or email already exists")
+	}
+
 	newUser := model.User{
-		Email:        email,
-		Username:     username,
+		Username:     createRequest.Username,
+		Email:        createRequest.Email,
 		PasswordHash: utils.HashPassword(createRequest.Password),
 	}
 	return s.userRepo.Create(newUser)
@@ -55,21 +60,19 @@ func (s userServiceImp) Update(userId int, updateRequest dto.UpdateUserRequest) 
 	if err != nil {
 		return err
 	}
-	if user == nil {
-		return errors.New("user not found")
+	existingUserEmail, err := s.userRepo.GetByEmail(updateRequest.Email)
+	if err == nil && existingUserEmail.ID != userId {
+		// Eger email başga admin tarapyndan eýýelenýän bolsa, ýalňyşlyk döretmek
+		return fmt.Errorf("e-mail salgy eýýäm ulanylýar: %s", updateRequest.Email)
 	}
-	if updateRequest.Username != "" {
-		if err := validateUniqueUsername(updateRequest.Username, userId, s.userRepo); err != nil {
-			return err
-		}
-		user.Username = updateRequest.Username
+
+	existingAdminUsername, err := s.userRepo.GetByUsername(updateRequest.Username)
+	if err == nil && existingAdminUsername.ID != userId {
+		// Eger username başga admin tarapyndan eýýelenýän bolsa, ýalňyşlyk döretmek
+		return fmt.Errorf("username ady eýýäm ulanylýar: %s", updateRequest.Username)
 	}
-	if updateRequest.Email != "" {
-		if err := validateUniqueEmail(updateRequest.Email, userId, s.userRepo); err != nil {
-			return err
-		}
-		user.Email = updateRequest.Email
-	}
+	user.Username = updateRequest.Username
+	user.Email = updateRequest.Email
 	return s.userRepo.Update(user.ID, *user)
 }
 
@@ -78,7 +81,7 @@ func (s userServiceImp) Delete(userId int) error {
 	if err != nil {
 		return err
 	}
-	if user.ID != 0 {
+	if user.ID == 0 {
 		return errors.New("something error")
 	}
 	return s.userRepo.Delete(user.ID)
@@ -123,33 +126,4 @@ func (s userServiceImp) LoginUser(loginRequest dto.UserLoginRequest) (*dto.UserL
 	}
 	loginResponse := dto.NewUserLoginResponse(user, accessToken)
 	return loginResponse, nil
-}
-
-func validateUniqueEmail(email string, adminId int, repo repository.UserRepository) error {
-	existingAdmin, err := repo.GetByEmail(email)
-	if err != nil {
-		return err
-	}
-	if existingAdmin != nil && existingAdmin.ID != adminId {
-		return errors.New("this email is already used by another admin")
-	}
-	return nil
-}
-
-func validateUniqueUsername(username string, adminId int, repo repository.UserRepository) error {
-	existingAdmin, err := repo.GetByUsername(username)
-	if err != nil {
-		return err
-	}
-	if existingAdmin != nil && existingAdmin.ID != adminId {
-		return errors.New("this username is already used by another admin")
-	}
-	return nil
-}
-
-func validateUniqueEmailAndUsername(email, username string, repo repository.UserRepository) error {
-	if err := validateUniqueEmail(email, 0, repo); err != nil {
-		return err
-	}
-	return validateUniqueUsername(username, 0, repo)
 }
