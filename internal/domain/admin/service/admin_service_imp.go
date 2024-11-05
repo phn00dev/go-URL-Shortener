@@ -2,11 +2,13 @@ package service
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/phn00dev/go-URL-Shortener/internal/domain/admin/dto"
 	"github.com/phn00dev/go-URL-Shortener/internal/domain/admin/repository"
 	"github.com/phn00dev/go-URL-Shortener/internal/model"
 	"github.com/phn00dev/go-URL-Shortener/internal/utils"
+	jwttoken "github.com/phn00dev/go-URL-Shortener/pkg/jwtToken"
 )
 
 type adminServiceImp struct {
@@ -28,16 +30,22 @@ func (s adminServiceImp) FindAll() ([]model.Admin, error) {
 }
 
 func (s adminServiceImp) Create(createRequest dto.CreateAdminRequest) error {
-	if err := validateUniqueEmailAndUsername(createRequest.Email, createRequest.Username, s.adminRepo); err != nil {
+	// Gaýtalanýan ulanyjy adyny ýa-da emaili barlamak
+	existingAdmin, err := s.adminRepo.FindByUsernameOrEmail(createRequest.Username, createRequest.Email)
+	if err != nil {
 		return err
 	}
+	if existingAdmin != nil {
+		return errors.New("username or email already exists")
+	}
 
+	// Täze admin döretmek
 	admin := model.Admin{
 		Username:     createRequest.Username,
 		Email:        createRequest.Email,
+		AdminRole:    createRequest.AdminRole,
 		PasswordHash: utils.HashPassword(createRequest.Password),
 	}
-
 	return s.adminRepo.Create(admin)
 }
 
@@ -46,25 +54,23 @@ func (s adminServiceImp) Update(adminId int, updateRequest dto.UpdateAdminReques
 	if err != nil {
 		return err
 	}
-	if admin == nil {
-		return errors.New("admin not found")
+	existingAdminEmail, err := s.adminRepo.GetAdminByEmail(updateRequest.Email)
+	if err == nil && existingAdminEmail.ID != adminId {
+		// Eger email başga admin tarapyndan eýýelenýän bolsa, ýalňyşlyk döretmek
+		return fmt.Errorf("e-mail salgy eýýäm ulanylýar: %s", updateRequest.Email)
 	}
 
-	if updateRequest.Username != "" {
-		if err := validateUniqueUsername(updateRequest.Username, adminId, s.adminRepo); err != nil {
-			return err
-		}
-		admin.Username = updateRequest.Username
+	existingAdminUsername, err := s.adminRepo.GetAdminByUsername(updateRequest.Username)
+	if err == nil && existingAdminUsername.ID != adminId {
+		// Eger username başga admin tarapyndan eýýelenýän bolsa, ýalňyşlyk döretmek
+		return fmt.Errorf("username ady eýýäm ulanylýar: %s", updateRequest.Username)
 	}
 
-	if updateRequest.Email != "" {
-		if err := validateUniqueEmail(updateRequest.Email, adminId, s.adminRepo); err != nil {
-			return err
-		}
-		admin.Email = updateRequest.Email
-	}
-
+	admin.Username = updateRequest.Username
+	admin.Email = updateRequest.Email
+	admin.AdminRole = updateRequest.AdminRole
 	return s.adminRepo.Update(admin.ID, *admin)
+
 }
 
 func (s adminServiceImp) Delete(adminId int) error {
@@ -98,31 +104,22 @@ func (s adminServiceImp) UpdateAdminPassword(adminId int, changePasswordRequest 
 	return s.adminRepo.UpdateAdminPassword(admin.ID, newPasswordHash)
 }
 
-func validateUniqueEmail(email string, adminId int, repo repository.AdminRepository) error {
-	existingAdmin, err := repo.GetAdminByEmail(email)
+func (s adminServiceImp) AdminLogin(loginRequest dto.AdminLoginRequest) (*dto.AdminLoginResponse, error) {
+	// get admin with username
+	admin, err := s.adminRepo.GetAdminByUsername(loginRequest.Username)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	if existingAdmin != nil && existingAdmin.ID != adminId {
-		return errors.New("this email is already used by another admin")
+	// check password
+	if !utils.CheckPasswordHash(loginRequest.Password, admin.PasswordHash) {
+		return nil, errors.New("username or password wrong")
 	}
-	return nil
-}
+	// generate token
 
-func validateUniqueUsername(username string, adminId int, repo repository.AdminRepository) error {
-	existingAdmin, err := repo.GetAdminByUsername(username)
+	accessToken, err := jwttoken.GenerateToken(admin.ID, admin.Username, admin.Email)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	if existingAdmin != nil && existingAdmin.ID != adminId {
-		return errors.New("this username is already used by another admin")
-	}
-	return nil
-}
-
-func validateUniqueEmailAndUsername(email, username string, repo repository.AdminRepository) error {
-	if err := validateUniqueEmail(email, 0, repo); err != nil {
-		return err
-	}
-	return validateUniqueUsername(username, 0, repo)
+	loginResponse := dto.NewAdminLoginResponse(admin, accessToken)
+	return loginResponse, nil
 }

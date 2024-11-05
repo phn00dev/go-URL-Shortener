@@ -7,6 +7,7 @@ import (
 
 	"github.com/phn00dev/go-URL-Shortener/internal/model"
 	"github.com/phn00dev/go-URL-Shortener/internal/utils"
+
 )
 
 func adminSeeder(db *gorm.DB) error {
@@ -19,7 +20,6 @@ func adminSeeder(db *gorm.DB) error {
 		AdminRole:    "super_admin",
 		PasswordHash: password,
 	}
-
 	admins = append(admins, superAdmin)
 	for i := 1; i <= 5; i++ {
 		admin := model.Admin{

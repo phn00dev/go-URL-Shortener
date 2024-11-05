@@ -8,7 +8,6 @@ import (
 
 	"github.com/phn00dev/go-URL-Shortener/pkg/config"
 	dbconfig "github.com/phn00dev/go-URL-Shortener/pkg/database/db_config"
-	"github.com/phn00dev/go-URL-Shortener/pkg/database/seeders"
 	"github.com/phn00dev/go-URL-Shortener/pkg/httpClient"
 )
 
@@ -37,11 +36,11 @@ func GetDependencies() (*Dependencies, error) {
 
 	// db seeder
 
-	newSeeder := seeders.NewDBSeeder(getDB)
-	if err := newSeeder.GetAllSeeder(); err != nil {
-		fmt.Printf("seeder error: %v", err.Error())
-		return nil, err
-	}
+	// newSeeder := seeders.NewDBSeeder(getDB)
+	// if err := newSeeder.GetAllSeeder(); err != nil {
+	// 	fmt.Printf("seeder error: %v", err.Error())
+	// 	return nil, err
+	// }
 
 	// HTTP müşderisini döretmek
 	clientHttp := httpClient.NewHttp()

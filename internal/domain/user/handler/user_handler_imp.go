@@ -10,6 +10,7 @@ import (
 	"github.com/phn00dev/go-URL-Shortener/internal/domain/user/service"
 	"github.com/phn00dev/go-URL-Shortener/internal/utils/response"
 	"github.com/phn00dev/go-URL-Shortener/internal/utils/validate"
+
 )
 
 type userHandlerImp struct {
@@ -119,6 +120,7 @@ func (userHandler userHandlerImp) UpdateUserPassword(c *gin.Context) {
 	}
 	response.Success(c, http.StatusOK, "user password updated successfully", nil)
 }
+
 func (userHandler userHandlerImp) LoginUser(c *gin.Context) {
 
 	var userLoginRequest dto.UserLoginRequest

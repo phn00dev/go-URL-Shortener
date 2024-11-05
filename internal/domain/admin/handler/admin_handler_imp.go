@@ -10,6 +10,7 @@ import (
 	"github.com/phn00dev/go-URL-Shortener/internal/domain/admin/dto"
 	"github.com/phn00dev/go-URL-Shortener/internal/domain/admin/service"
 	"github.com/phn00dev/go-URL-Shortener/internal/utils/response"
+	"github.com/phn00dev/go-URL-Shortener/internal/utils/validate"
 )
 
 type adminHandlerImp struct {
@@ -52,8 +53,8 @@ func (adminHandler adminHandlerImp) GetAll(c *gin.Context) {
 
 func (adminHandler adminHandlerImp) Create(c *gin.Context) {
 	var createRequest dto.CreateAdminRequest
-	if err := c.ShouldBindJSON(&createRequest); err != nil {
-		response.Error(c, http.StatusBadRequest, "data parsing error", err.Error())
+	if err := c.ShouldBindBodyWithJSON(&createRequest); err != nil {
+		response.Error(c, http.StatusBadRequest, "body parser error", err.Error())
 		return
 	}
 
@@ -80,7 +81,7 @@ func (adminHandler adminHandlerImp) Update(c *gin.Context) {
 	}
 
 	var updateRequest dto.UpdateAdminRequest
-	if err := c.ShouldBindJSON(&updateRequest); err != nil {
+	if err := c.ShouldBindBodyWithJSON(&updateRequest); err != nil {
 		response.Error(c, http.StatusBadRequest, "data parsing error", err.Error())
 		return
 	}
@@ -120,7 +121,7 @@ func (adminHandler adminHandlerImp) UpdateAdminPassword(c *gin.Context) {
 	adminId, _ := strconv.Atoi(adminIdStr)
 
 	var changePasswordRequest dto.ChangeAdminPassword
-	if err := c.ShouldBindJSON(&changePasswordRequest); err != nil {
+	if err := c.ShouldBindBodyWithJSON(&changePasswordRequest); err != nil {
 		response.Error(c, http.StatusBadRequest, "data parsing error", err.Error())
 		return
 	}
@@ -131,4 +132,24 @@ func (adminHandler adminHandlerImp) UpdateAdminPassword(c *gin.Context) {
 		return
 	}
 	response.Success(c, http.StatusOK, "password updated successfully", nil)
+}
+func (adminHandler adminHandlerImp) LoginAdmin(c *gin.Context) {
+	var adminLoginRequest dto.AdminLoginRequest
+	// Pointer görnüşinde geçiriň: &adminLoginRequest
+	if err := c.ShouldBindJSON(&adminLoginRequest); err != nil {
+		response.Error(c, http.StatusBadRequest, "body parser error", err.Error())
+		return
+	}
+	// validate data
+	if err := validate.ValidateStruct(adminLoginRequest); err != nil {
+		response.Error(c, http.StatusBadRequest, "validate error", err.Error())
+		return
+	}
+	// call login service
+	loginResponse, err := adminHandler.adminService.AdminLogin(adminLoginRequest)
+	if err != nil {
+		response.Error(c, http.StatusInternalServerError, "something wrong", err.Error())
+		return
+	}
+	response.Success(c, http.StatusOK, "admin login successfully", loginResponse)
 }

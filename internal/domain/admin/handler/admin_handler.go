@@ -9,4 +9,5 @@ type AdminHandler interface {
 	Update(c *gin.Context)
 	Delete(c *gin.Context)
 	UpdateAdminPassword(c *gin.Context)
+	LoginAdmin(c *gin.Context)
 }

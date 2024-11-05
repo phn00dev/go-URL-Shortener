@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"errors"
+
 	"gorm.io/gorm"
 
 	"github.com/phn00dev/go-URL-Shortener/internal/model"
@@ -27,7 +29,7 @@ func (adminRepo adminRepositoryImp) GetOneById(adminId int) (*model.Admin, error
 
 func (adminRepo adminRepositoryImp) GetAll() ([]model.Admin, error) {
 	var admins []model.Admin
-	if err := adminRepo.db.Find(&admins).Error; err != nil {
+	if err := adminRepo.db.Where("admin_role=?", "admin").Order("id desc").Find(&admins).Error; err != nil {
 		return nil, err
 	}
 	return admins, nil
@@ -68,4 +70,26 @@ func (adminRepo adminRepositoryImp) UpdateAdminPassword(adminId int, password st
 		return err
 	}
 	return nil
+}
+
+func (adminRepo adminRepositoryImp) FindByUsernameOrEmail(username, email string) (*model.Admin, error) {
+	var admin model.Admin
+	if err := adminRepo.db.Where("username = ? OR email = ?", username, email).First(&admin).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil // Gaýtalanmaýan ýagdaýda nil gaýtarýar
+		}
+		return nil, err // Başga ýalňyşlyk bar bolsa, ýalňyşlygy gaýtarýar
+	}
+	return &admin, nil
+}
+
+func (adminRepo adminRepositoryImp) FindByUsernameOrEmailById(adminId int, username, email string) (*model.Admin, error) {
+	var admin model.Admin
+	if err := adminRepo.db.Where("id !=?", adminId).Where("username = ? OR email = ?", username, email).First(&admin).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &admin, nil
 }
