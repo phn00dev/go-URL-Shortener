@@ -9,4 +9,5 @@ type UserHandler interface {
 	Update(c *gin.Context)
 	Delete(c *gin.Context)
 	UpdateUserPassword(c *gin.Context)
+	LoginUser(c *gin.Context)
 }

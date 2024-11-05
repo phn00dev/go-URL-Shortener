@@ -119,3 +119,26 @@ func (userHandler userHandlerImp) UpdateUserPassword(c *gin.Context) {
 	}
 	response.Success(c, http.StatusOK, "user password updated successfully", nil)
 }
+func (userHandler userHandlerImp) LoginUser(c *gin.Context) {
+
+	var userLoginRequest dto.UserLoginRequest
+	if err := c.ShouldBindBodyWithJSON(&userLoginRequest); err != nil {
+		response.Error(c, http.StatusBadRequest, "body parser error", err.Error())
+		return
+	}
+
+	// validate error
+	if err := validate.ValidateStruct(userLoginRequest); err != nil {
+		response.Error(c, http.StatusBadRequest, "validate error", err.Error())
+		return
+	}
+
+	// login service
+
+	loginResponse, err := userHandler.userService.LoginUser(userLoginRequest)
+	if err != nil {
+		response.Error(c, http.StatusInternalServerError, "something wrong", err.Error())
+		return
+	}
+	response.Success(c, http.StatusOK, "user login successfully", loginResponse)
+}

@@ -7,6 +7,7 @@ import (
 	"github.com/phn00dev/go-URL-Shortener/internal/domain/user/repository"
 	"github.com/phn00dev/go-URL-Shortener/internal/model"
 	"github.com/phn00dev/go-URL-Shortener/internal/utils"
+	jwttoken "github.com/phn00dev/go-URL-Shortener/pkg/jwtToken"
 )
 
 type userServiceImp struct {
@@ -100,6 +101,28 @@ func (s userServiceImp) UpdateUserPassword(userId int, updatePasswordRequest dto
 	newPasswordHash := utils.HashPassword(updatePasswordRequest.Password)
 	return s.userRepo.UpdateUserPassword(user.ID, newPasswordHash)
 
+}
+
+func (s userServiceImp) LoginUser(loginRequest dto.UserLoginRequest) (*dto.UserLoginResponse, error) {
+	// get user with email
+	user, err := s.userRepo.GetByUsername(loginRequest.Username)
+	if err != nil {
+		return nil, err
+	}
+	if user.ID == 0 {
+		return nil, errors.New("username or password wrong")
+	}
+	// password barlag
+	if !utils.CheckPasswordHash(loginRequest.Password, user.PasswordHash) {
+		return nil, errors.New("username or password wrong")
+	}
+	// generate token
+	accessToken, err := jwttoken.GenerateToken(user.ID, user.Username, user.Email)
+	if err != nil {
+		return nil, errors.New("something wrong")
+	}
+	loginResponse := dto.NewUserLoginResponse(user, accessToken)
+	return loginResponse, nil
 }
 
 func validateUniqueEmail(email string, adminId int, repo repository.UserRepository) error {

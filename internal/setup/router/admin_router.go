@@ -8,7 +8,7 @@ import (
 )
 
 func AdminRoutes(route *gin.Engine) {
-	adminApiRoute := route.Group("/api/v1/admin")
+	adminApiRoute := route.Group("/v1a/api/admin")
 	adminRoute := adminApiRoute.Group("/admins")
 	{
 		adminRoute.GET("/", adminConstructor.AdminHandler.GetAll)

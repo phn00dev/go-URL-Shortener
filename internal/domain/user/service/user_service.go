@@ -3,7 +3,6 @@ package service
 import (
 	"github.com/phn00dev/go-URL-Shortener/internal/domain/user/dto"
 	"github.com/phn00dev/go-URL-Shortener/internal/model"
-
 )
 
 type UserService interface {
@@ -13,4 +12,5 @@ type UserService interface {
 	Update(userId int, updateRequest dto.UpdateUserRequest) error
 	Delete(userId int) error
 	UpdateUserPassword(userId int, updatePasswordRequest dto.UpdateUserPassword) error
+	LoginUser(loginRequest dto.UserLoginRequest) (*dto.UserLoginResponse, error)
 }
