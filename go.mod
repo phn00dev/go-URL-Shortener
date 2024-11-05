@@ -9,9 +9,9 @@ require (
 	gorm.io/gorm v1.25.12
 )
 
-require github.com/golang-jwt/jwt/v5 v5.2.1
 
-require github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
+
+require github.com/golang-jwt/jwt v3.2.2+incompatible 
 
 require (
 	github.com/BurntSushi/toml v1.4.0 // indirect
