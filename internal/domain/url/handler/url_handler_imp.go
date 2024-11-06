@@ -10,6 +10,7 @@ import (
 	"github.com/phn00dev/go-URL-Shortener/internal/domain/url/service"
 	"github.com/phn00dev/go-URL-Shortener/internal/utils/response"
 	"github.com/phn00dev/go-URL-Shortener/internal/utils/validate"
+
 )
 
 type urlHandlerImp struct {
@@ -23,43 +24,20 @@ func NewUrlHandler(service service.UrlService) UrlHandler {
 }
 
 func (urlHandler urlHandlerImp) GetAll(c *gin.Context) {
-	userIdStr, exists := c.Get("id")
-	userId := userIdStr.(int)
-	if !exists {
-		response.Error(c, http.StatusUnauthorized, "error auth", "User not authorized")
-		return
-	}
 
-	if userId == 0 {
-		response.Error(c, http.StatusUnauthorized, "error auth", "User not authorized")
-		return
-	}
-	urls, err := urlHandler.urlService.FindAll(userId)
+	urls, err := urlHandler.urlService.FindAll()
 	if err != nil {
-		response.Error(c, http.StatusInternalServerError, "user urls error", err.Error())
+		response.Error(c, http.StatusInternalServerError, "urls error", err.Error())
 		return
 	}
-	response.Success(c, http.StatusOK, "user all urls", urls)
-
+	response.Success(c, http.StatusOK, "all urls", urls)
 }
 
 func (urlHandler urlHandlerImp) GetOne(c *gin.Context) {
-	userIdStr, exists := c.Get("id")
-	userId := userIdStr.(int)
-	if !exists {
-		response.Error(c, http.StatusUnauthorized, "error auth", "User not authorized")
-		return
-	}
-
-	if userId == 0 {
-		response.Error(c, http.StatusUnauthorized, "error auth", "User not authorized")
-		return
-	}
-
 	urlIdStr := c.Param("urlId")
 	urlId, _ := strconv.Atoi(urlIdStr)
 	// get url
-	url, err := urlHandler.urlService.FindOne(userId, urlId)
+	url, err := urlHandler.urlService.FindOne(urlId)
 	if err != nil {
 		response.Error(c, http.StatusInternalServerError, "url not found", err.Error())
 		return
@@ -99,6 +77,8 @@ func (urlHandler urlHandlerImp) Create(c *gin.Context) {
 	}
 	response.Success(c, http.StatusCreated, "short url created successfully", nil)
 }
+
+
 
 func (urlHandler urlHandlerImp) Delete(c *gin.Context) {
 	userIdStr, exists := c.Get("id")

@@ -8,6 +8,7 @@ import (
 	userRepository "github.com/phn00dev/go-URL-Shortener/internal/domain/user/repository"
 	"github.com/phn00dev/go-URL-Shortener/internal/model"
 	generateshorturl "github.com/phn00dev/go-URL-Shortener/internal/utils/generate_short_url"
+
 )
 
 type urlServiceImp struct {
@@ -22,16 +23,16 @@ func NewUrlService(urlRepo repository.UrlRepository, userRepo userRepository.Use
 	}
 }
 
-func (urlService urlServiceImp) FindAll(userId int) ([]model.Url, error) {
-	urls, err := urlService.urlRepo.GetAllUrl(userId)
+func (urlService urlServiceImp) FindAll() ([]model.Url, error) {
+	urls, err := urlService.urlRepo.GetAllUrl()
 	if err != nil {
 		return nil, err
 	}
 	return urls, nil
 }
 
-func (urlService urlServiceImp) FindOne(userId, urlId int) (*model.Url, error) {
-	user, err := urlService.urlRepo.GetUrlById(userId, urlId)
+func (urlService urlServiceImp) FindOne(urlId int) (*model.Url, error) {
+	user, err := urlService.urlRepo.GetUrlById(urlId)
 	if err != nil {
 		return nil, err
 	}
@@ -58,7 +59,7 @@ func (urlService urlServiceImp) Create(userId int, createUrlRequest dto.CreateUr
 }
 
 func (urlService urlServiceImp) Delete(userId, urlId int) error {
-	url, err := urlService.urlRepo.GetUrlById(userId, urlId)
+	url, err := urlService.urlRepo.GetUrlById(urlId)
 	if err != nil {
 		return err
 	}

@@ -10,7 +10,6 @@ import (
 	"github.com/phn00dev/go-URL-Shortener/internal/domain/user/service"
 	"github.com/phn00dev/go-URL-Shortener/internal/utils/response"
 	"github.com/phn00dev/go-URL-Shortener/internal/utils/validate"
-
 )
 
 type userHandlerImp struct {
@@ -55,9 +54,7 @@ func (userHandler userHandlerImp) Create(c *gin.Context) {
 		response.Error(c, http.StatusBadRequest, "validate error", err.Error())
 		return
 	}
-
 	// create user
-
 	if err := userHandler.userService.Create(createRequest); err != nil {
 		response.Error(c, http.StatusInternalServerError, "create user error", err.Error())
 		return

@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	jwttoken "github.com/phn00dev/go-URL-Shortener/pkg/jwtToken"
+
 )
 
 func AuthMiddleware() gin.HandlerFunc {
