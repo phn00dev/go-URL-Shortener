@@ -37,16 +37,15 @@ func (urlService urlServiceImp) FindOne(urlId int) (*model.Url, error) {
 	}
 	return user, nil
 }
-
-func (urlService urlServiceImp) Create(userId int, createUrlRequest dto.CreateUrlRequest) error {
+func (urlService urlServiceImp) Create(userId int, createUrlRequest dto.CreateUrlRequest) (*model.Url, error) {
 
 	// find user
 	user, err := urlService.userRepo.GetById(userId)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if user.ID == 0 {
-		return errors.New("user not found")
+		return nil, errors.New("user not found")
 	}
 	newUrl := model.Url{
 		OriginalUrl: createUrlRequest.OriginalUrl,
@@ -54,7 +53,14 @@ func (urlService urlServiceImp) Create(userId int, createUrlRequest dto.CreateUr
 		UserID:      user.ID,
 		ClickCount:  0,
 	}
-	return urlService.urlRepo.Create(newUrl)
+
+	// Create new URL in DB
+	if err := urlService.urlRepo.Create(newUrl); err != nil {
+		return nil, err
+	}
+
+	// After creation, return the created URL object
+	return &newUrl, nil
 }
 
 func (urlService urlServiceImp) Delete(userId, urlId int) error {
@@ -100,6 +106,19 @@ func (urlService urlServiceImp) FindOneUserUrl(userId, urlId int) (*model.Url, e
 		return nil, err
 	}
 	url, err := urlService.urlRepo.GetOneUserUrl(user.ID, urlId)
+	if err != nil {
+		return nil, err
+	}
+	return url, nil
+}
+
+func (urlService urlServiceImp) GetByShortUrl(shortUrl string) (*model.Url, error) {
+
+	if shortUrl == "" {
+		return nil, errors.New("not empty url")
+	}
+
+	url, err := urlService.urlRepo.GetUrlByShortUrl(shortUrl)
 	if err != nil {
 		return nil, err
 	}

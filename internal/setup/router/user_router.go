@@ -33,8 +33,8 @@ func UserRoutes(r *gin.Engine) {
 			userUrlRoute.GET("/:urlId", urlConstructor.UrlHandler.GetOneUserUrl)
 			userUrlRoute.POST("/create", urlConstructor.UrlHandler.Create)
 			userUrlRoute.DELETE("/:urlId", urlConstructor.UrlHandler.Delete)
-
 		}
 
 	}
+	r.GET("/:shortUrl", urlConstructor.UrlHandler.RedirectToOriginalUrl)
 }

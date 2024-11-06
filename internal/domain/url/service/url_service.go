@@ -8,10 +8,11 @@ import (
 type UrlService interface {
 	FindAll() ([]model.Url, error)
 	FindOne(urlId int) (*model.Url, error)
-	Create(userId int, createUrlRequest dto.CreateUrlRequest) error
+	Create(userId int, createUrlRequest dto.CreateUrlRequest) (*model.Url, error)
 	Delete(userId, urlId int) error
 
 	// user urls
 	FindAllUserUrls(userId int) ([]model.Url, error)
 	FindOneUserUrl(userId, urlId int) (*model.Url, error)
+	GetByShortUrl(shortUrl string) (*model.Url, error)
 }

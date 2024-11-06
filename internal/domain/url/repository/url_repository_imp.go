@@ -6,6 +6,7 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/phn00dev/go-URL-Shortener/internal/model"
+
 )
 
 type urlRepositoryImp struct {
@@ -40,10 +41,7 @@ func (urlRepo urlRepositoryImp) Create(url model.Url) error {
 
 func (urlRepo urlRepositoryImp) Delete(userId, urlId int) error {
 	var url model.Url
-	// Ilki bilen URL-äni gözlemek
 	result := urlRepo.db.Where("user_id = ? AND id = ?", userId, urlId).Delete(&url)
-
-	// Pozulýan maglumatyň barlygyny we hatalary barlamak
 	if result.Error != nil {
 		return result.Error
 	}
@@ -53,7 +51,7 @@ func (urlRepo urlRepositoryImp) Delete(userId, urlId int) error {
 	return nil
 }
 
-func (urlRepo urlRepositoryImp) GetUrlShortUrl(shortUrl string) (*model.Url, error) {
+func (urlRepo urlRepositoryImp) GetUrlByShortUrl(shortUrl string) (*model.Url, error) {
 	var url model.Url
 	if err := urlRepo.db.Where("short_url=?", shortUrl).First(&url).Error; err != nil {
 		return nil, err

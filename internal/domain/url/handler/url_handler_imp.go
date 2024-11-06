@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"log"
 	"net/http"
 	"strconv"
 
@@ -46,35 +47,42 @@ func (urlHandler urlHandlerImp) GetOne(c *gin.Context) {
 
 func (urlHandler urlHandlerImp) Create(c *gin.Context) {
 	var createRequest dto.CreateUrlRequest
+
+	// User ID almak
 	userIdStr, exists := c.Get("id")
 	userId := userIdStr.(int)
-	if !exists {
+	if !exists || userId == 0 {
 		response.Error(c, http.StatusUnauthorized, "error auth", "User not authorized")
 		return
 	}
 
-	if userId == 0 {
-		response.Error(c, http.StatusUnauthorized, "error auth", "User not authorized")
-		return
-	}
-
+	// Body'i parse etmek
 	if err := c.ShouldBindBodyWithJSON(&createRequest); err != nil {
 		response.Error(c, http.StatusBadRequest, "body parser error", err.Error())
 		return
 	}
 
-	// validate error
+	// Validasiya
 	if err := validate.ValidateStruct(createRequest); err != nil {
 		response.Error(c, http.StatusBadRequest, "validate error", err.Error())
 		return
 	}
 
-	// url create
-	if err := urlHandler.urlService.Create(userId, createRequest); err != nil {
+	// URL döretmek
+	newUrl, err := urlHandler.urlService.Create(userId, createRequest)
+	if err != nil {
 		response.Error(c, http.StatusInternalServerError, "short url created error", err.Error())
 		return
 	}
-	response.Success(c, http.StatusCreated, "short url created successfully", nil)
+
+	// Domeni almak (request URL-den)
+	domain := c.Request.Host // Domeni almak
+
+	// Full Short URL döretmek
+	fullShortUrl := "http://" + domain + "/" + newUrl.ShortUrl // Domeni bilen birleşdir
+
+	// Netijede full short URL-i görkezmek
+	response.Success(c, http.StatusCreated, "short url created successfully", fullShortUrl)
 }
 
 // user urls handler
@@ -151,4 +159,18 @@ func (urlHandler urlHandlerImp) Delete(c *gin.Context) {
 		return
 	}
 	response.Success(c, http.StatusOK, "URL deleted successfully", nil)
+}
+
+func (urlHandler urlHandlerImp) RedirectToOriginalUrl(c *gin.Context) {
+	shortUrl := c.Param("shortUrl") // short URL parametresini alýarys
+	log.Println(shortUrl)
+
+	url, err := urlHandler.urlService.GetByShortUrl(shortUrl)
+	if err != nil {
+		response.Error(c, http.StatusNotFound, "URL not found", "Short URL not found in the database")
+		return
+	}
+
+	// Original URL-e redireksiýa etmek
+	c.Redirect(http.StatusFound, url.OriginalUrl)
 }

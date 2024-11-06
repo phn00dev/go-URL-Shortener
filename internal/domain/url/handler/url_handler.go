@@ -10,4 +10,5 @@ type UrlHandler interface {
 	// user urls
 	GetAllUserUrls(c *gin.Context)
 	GetOneUserUrl(c *gin.Context)
+	RedirectToOriginalUrl(c *gin.Context)
 }

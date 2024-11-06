@@ -7,7 +7,7 @@ type UrlRepository interface {
 	GetAllUrl() ([]model.Url, error)
 	Create(url model.Url) error
 	Delete(userId, urlId int) error
-	GetUrlShortUrl(shortUrl string) (*model.Url, error)
+	GetUrlByShortUrl(shortUrl string) (*model.Url, error)
 
 	// user urls
 	GetAllUserUrl(userId int) ([]model.Url, error)
