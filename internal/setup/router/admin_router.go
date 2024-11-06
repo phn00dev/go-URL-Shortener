@@ -20,6 +20,7 @@ func AdminRoutes(route *gin.Engine) {
 		// admin routes
 		adminApiRoute.Use(middleware.AuthMiddleware())
 		adminRoute := adminApiRoute.Group("/admins")
+		adminRoute.Use(middleware.SuperAdminMiddleware())
 		{
 			adminRoute.GET("/", adminConstructor.AdminHandler.GetAll)
 			adminRoute.GET("/:adminId", adminConstructor.AdminHandler.GetOneById)

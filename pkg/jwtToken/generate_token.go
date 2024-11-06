@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt"
-
 )
 
 const SecretKey = "HJGYUDF!DN^Bdd$%asj*_dasdhas$$ash#dasd&%^$@"

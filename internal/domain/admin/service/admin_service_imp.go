@@ -9,6 +9,7 @@ import (
 	"github.com/phn00dev/go-URL-Shortener/internal/model"
 	"github.com/phn00dev/go-URL-Shortener/internal/utils"
 	jwttoken "github.com/phn00dev/go-URL-Shortener/pkg/jwtToken"
+
 )
 
 type adminServiceImp struct {
@@ -116,7 +117,7 @@ func (s adminServiceImp) AdminLogin(loginRequest dto.AdminLoginRequest) (*dto.Ad
 	}
 	// generate token
 
-	accessToken, err := jwttoken.GenerateToken(admin.ID, admin.Username, admin.Email)
+	accessToken, err := jwttoken.GenerateAdminToken(admin.ID, admin.Username, admin.Email, admin.AdminRole)
 	if err != nil {
 		return nil, err
 	}
