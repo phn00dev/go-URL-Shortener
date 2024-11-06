@@ -8,7 +8,6 @@ import (
 	userRepository "github.com/phn00dev/go-URL-Shortener/internal/domain/user/repository"
 	"github.com/phn00dev/go-URL-Shortener/internal/model"
 	generateshorturl "github.com/phn00dev/go-URL-Shortener/internal/utils/generate_short_url"
-
 )
 
 type urlServiceImp struct {
@@ -51,7 +50,7 @@ func (urlService urlServiceImp) Create(userId int, createUrlRequest dto.CreateUr
 	}
 	newUrl := model.Url{
 		OriginalUrl: createUrlRequest.OriginalUrl,
-		ShortUrl:    generateshorturl.GenerateShortUrl(11),
+		ShortUrl:    generateshorturl.GenerateShortUrl(10),
 		UserID:      user.ID,
 		ClickCount:  0,
 	}
@@ -59,16 +58,50 @@ func (urlService urlServiceImp) Create(userId int, createUrlRequest dto.CreateUr
 }
 
 func (urlService urlServiceImp) Delete(userId, urlId int) error {
+	// Ilki bilen URL-i tapmak
 	url, err := urlService.urlRepo.GetUrlById(urlId)
 	if err != nil {
 		return err
 	}
+
+	// URL-iň userId-nin dogrylygyny barlamak
+	if url.UserID != userId {
+		return errors.New("user not authorized to delete this url")
+	}
+
+	// URL pozulýan bolsa, ony pozmak
+	err = urlService.urlRepo.Delete(userId, urlId)
+	if err != nil {
+		return errors.New("failed to delete the URL")
+	}
+
+	return nil
+}
+
+// user urls
+
+func (urlService urlServiceImp) FindAllUserUrls(userId int) ([]model.Url, error) {
+	// get user
 	user, err := urlService.userRepo.GetById(userId)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	if user.ID != userId {
-		return errors.New("something wrong")
+	// user urls
+	userUrls, err := urlService.urlRepo.GetAllUserUrl(user.ID)
+	if err != nil {
+		return nil, err
 	}
-	return urlService.urlRepo.Delete(url.ID, user.ID)
+	return userUrls, nil
+}
+
+func (urlService urlServiceImp) FindOneUserUrl(userId, urlId int) (*model.Url, error) {
+	user, err := urlService.userRepo.GetById(userId)
+	if err != nil {
+		return nil, err
+	}
+	url, err := urlService.urlRepo.GetOneUserUrl(user.ID, urlId)
+	if err != nil {
+		return nil, err
+	}
+	return url, nil
 }

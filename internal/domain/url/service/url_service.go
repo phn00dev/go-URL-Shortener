@@ -10,4 +10,8 @@ type UrlService interface {
 	FindOne(urlId int) (*model.Url, error)
 	Create(userId int, createUrlRequest dto.CreateUrlRequest) error
 	Delete(userId, urlId int) error
+
+	// user urls
+	FindAllUserUrls(userId int) ([]model.Url, error)
+	FindOneUserUrl(userId, urlId int) (*model.Url, error)
 }
