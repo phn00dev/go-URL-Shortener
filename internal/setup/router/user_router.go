@@ -6,7 +6,6 @@ import (
 	urlConstructor "github.com/phn00dev/go-URL-Shortener/internal/domain/url/constructor"
 	userConstructor "github.com/phn00dev/go-URL-Shortener/internal/domain/user/constructor"
 	"github.com/phn00dev/go-URL-Shortener/internal/middleware"
-
 )
 
 func UserRoutes(r *gin.Engine) {

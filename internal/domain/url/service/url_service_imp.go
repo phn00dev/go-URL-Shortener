@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"log"
 
 	"github.com/phn00dev/go-URL-Shortener/internal/domain/url/dto"
 	"github.com/phn00dev/go-URL-Shortener/internal/domain/url/repository"
@@ -123,4 +124,21 @@ func (urlService urlServiceImp) GetByShortUrl(shortUrl string) (*model.Url, erro
 		return nil, err
 	}
 	return url, nil
+}
+
+func (urlService urlServiceImp) UpdateClickCount(urlId, clickCount int) error {
+	url, err := urlService.urlRepo.GetUrlById(urlId)
+	if err != nil {
+		return err
+	}
+	if url.ID == 0 {
+		return errors.New("something wrong")
+	}
+	// update click count
+	return urlService.urlRepo.UpdateUrlClickCount(url.ID, clickCount)
+}
+
+func (urlService urlServiceImp) SaveUrlAccessLog(accessLog model.UrlAccessLog) error {
+	log.Println("service icinde", accessLog)
+	return urlService.urlRepo.SaveUrlAccessLog(accessLog)
 }

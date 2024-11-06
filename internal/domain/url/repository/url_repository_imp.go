@@ -6,7 +6,6 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/phn00dev/go-URL-Shortener/internal/model"
-
 )
 
 type urlRepositoryImp struct {
@@ -62,7 +61,7 @@ func (urlRepo urlRepositoryImp) GetUrlByShortUrl(shortUrl string) (*model.Url, e
 // user urls
 func (urlRepo urlRepositoryImp) GetAllUserUrl(userId int) ([]model.Url, error) {
 	var userUrls []model.Url
-	if err := urlRepo.db.Where("user_id=?", userId).Find(&userUrls).Error; err != nil {
+	if err := urlRepo.db.Where("user_id=?", userId).Order("id desc").Find(&userUrls).Error; err != nil {
 		return nil, err
 	}
 	return userUrls, nil
@@ -74,4 +73,12 @@ func (urlRepo urlRepositoryImp) GetOneUserUrl(userId, urlId int) (*model.Url, er
 		return nil, err
 	}
 	return &url, nil
+}
+
+func (urlRepo urlRepositoryImp) UpdateUrlClickCount(urlId, clickCount int) error {
+	return urlRepo.db.Model(model.Url{}).Where("id=?", urlId).Update("click_count", clickCount).Error
+}
+
+func (urlRepo urlRepositoryImp) SaveUrlAccessLog(accessLog model.UrlAccessLog) error {
+	return urlRepo.db.Create(&accessLog).Error
 }

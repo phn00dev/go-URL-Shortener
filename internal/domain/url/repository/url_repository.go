@@ -12,4 +12,6 @@ type UrlRepository interface {
 	// user urls
 	GetAllUserUrl(userId int) ([]model.Url, error)
 	GetOneUserUrl(userId, urlId int) (*model.Url, error)
+	UpdateUrlClickCount(urlId, clickCount int) error
+	SaveUrlAccessLog(accessLog model.UrlAccessLog) error
 }

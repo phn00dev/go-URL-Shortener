@@ -15,4 +15,6 @@ type UrlService interface {
 	FindAllUserUrls(userId int) ([]model.Url, error)
 	FindOneUserUrl(userId, urlId int) (*model.Url, error)
 	GetByShortUrl(shortUrl string) (*model.Url, error)
+	UpdateClickCount(urlId, clickCount int) error
+	SaveUrlAccessLog(accessLog model.UrlAccessLog) error
 }
