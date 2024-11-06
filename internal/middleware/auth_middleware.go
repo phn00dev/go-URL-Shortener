@@ -6,27 +6,27 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"github.com/phn00dev/go-URL-Shortener/internal/utils/response"
 	jwttoken "github.com/phn00dev/go-URL-Shortener/pkg/jwtToken"
-
 )
 
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization header required"})
+			response.Error(c, http.StatusUnauthorized, "error", "Authorization header required")
 			c.Abort()
 			return
 		}
 		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
 		if tokenString == authHeader {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Bearer token required"})
+			response.Error(c, http.StatusUnauthorized, "error", "Bearer token required")
 			c.Abort()
 			return
 		}
-		claims, err := jwttoken.ValidateAdminToken(tokenString)
+		claims, err := jwttoken.ValidateToken(tokenString)
 		if err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
+			response.Error(c, http.StatusUnauthorized, "error", "Invalid token")
 			c.Abort()
 			return
 		}

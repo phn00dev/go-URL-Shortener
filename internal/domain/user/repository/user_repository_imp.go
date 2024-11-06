@@ -6,6 +6,7 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/phn00dev/go-URL-Shortener/internal/model"
+
 )
 
 type userRepositoryImp struct {
@@ -63,7 +64,7 @@ func (userRepo userRepositoryImp) Delete(userId int) error {
 }
 
 func (userRepo userRepositoryImp) UpdateUserPassword(userId int, password string) error {
-	if err := userRepo.db.Model(&model.User{}).Where("id = ?", userId).Update("password", password).Error; err != nil {
+	if err := userRepo.db.Model(&model.User{}).Where("id = ?", userId).Update("password_hash", password).Error; err != nil {
 		return err
 	}
 	return nil

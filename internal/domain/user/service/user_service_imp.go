@@ -37,22 +37,63 @@ func (s userServiceImp) FindOne(userId int) (*model.User, error) {
 	return user, nil
 }
 
-func (s userServiceImp) Create(createRequest dto.CreateUserRequest) error {
-	existingUser, err := s.userRepo.FindByUsernameOrEmail(createRequest.Username, createRequest.Email)
+func (s userServiceImp) Delete(userId int) error {
+	user, err := s.userRepo.GetById(userId)
 	if err != nil {
 		return err
 	}
+	if user.ID == 0 {
+		return errors.New("something error")
+	}
+	return s.userRepo.Delete(user.ID)
+}
 
+// user
+
+func (s userServiceImp) RegisterUser(registerRequest dto.RegisterUserRequest) error {
+	existingUser, err := s.userRepo.FindByUsernameOrEmail(registerRequest.Username, registerRequest.Email)
+	if err != nil {
+		return err
+	}
 	if existingUser != nil {
 		return errors.New("username or email already exists")
 	}
-
 	newUser := model.User{
-		Username:     createRequest.Username,
-		Email:        createRequest.Email,
-		PasswordHash: utils.HashPassword(createRequest.Password),
+		Username:     registerRequest.Username,
+		Email:        registerRequest.Email,
+		PasswordHash: utils.HashPassword(registerRequest.Password),
 	}
 	return s.userRepo.Create(newUser)
+}
+
+func (s userServiceImp) LoginUser(loginRequest dto.UserLoginRequest) (*dto.UserLoginResponse, error) {
+	// get user with email
+	user, err := s.userRepo.GetByUsername(loginRequest.Username)
+	if err != nil {
+		return nil, errors.New("username or password wrong")
+	}
+	if user.ID == 0 {
+		return nil, errors.New("username or password wrong")
+	}
+	// password barlag
+	if !utils.CheckPasswordHash(loginRequest.Password, user.PasswordHash) {
+		return nil, errors.New("username or password wrong")
+	}
+	// generate token
+	accessToken, err := jwttoken.GenerateToken(user.ID, user.Username, user.Email)
+	if err != nil {
+		return nil, errors.New("something wrong")
+	}
+	loginResponse := dto.NewUserLoginResponse(user, accessToken)
+	return loginResponse, nil
+}
+
+func (s userServiceImp) GetUserById(userId int) (*model.User, error) {
+	user, err := s.userRepo.GetById(userId)
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
 }
 
 func (s userServiceImp) Update(userId int, updateRequest dto.UpdateUserRequest) error {
@@ -76,17 +117,6 @@ func (s userServiceImp) Update(userId int, updateRequest dto.UpdateUserRequest) 
 	return s.userRepo.Update(user.ID, *user)
 }
 
-func (s userServiceImp) Delete(userId int) error {
-	user, err := s.userRepo.GetById(userId)
-	if err != nil {
-		return err
-	}
-	if user.ID == 0 {
-		return errors.New("something error")
-	}
-	return s.userRepo.Delete(user.ID)
-}
-
 func (s userServiceImp) UpdateUserPassword(userId int, updatePasswordRequest dto.UpdateUserPassword) error {
 	user, err := s.userRepo.GetById(userId)
 	if err != nil {
@@ -104,26 +134,4 @@ func (s userServiceImp) UpdateUserPassword(userId int, updatePasswordRequest dto
 	newPasswordHash := utils.HashPassword(updatePasswordRequest.Password)
 	return s.userRepo.UpdateUserPassword(user.ID, newPasswordHash)
 
-}
-
-func (s userServiceImp) LoginUser(loginRequest dto.UserLoginRequest) (*dto.UserLoginResponse, error) {
-	// get user with email
-	user, err := s.userRepo.GetByUsername(loginRequest.Username)
-	if err != nil {
-		return nil, err
-	}
-	if user.ID == 0 {
-		return nil, errors.New("username or password wrong")
-	}
-	// password barlag
-	if !utils.CheckPasswordHash(loginRequest.Password, user.PasswordHash) {
-		return nil, errors.New("username or password wrong")
-	}
-	// generate token
-	accessToken, err := jwttoken.GenerateToken(user.ID, user.Username, user.Email)
-	if err != nil {
-		return nil, errors.New("something wrong")
-	}
-	loginResponse := dto.NewUserLoginResponse(user, accessToken)
-	return loginResponse, nil
 }

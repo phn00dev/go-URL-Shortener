@@ -8,9 +8,11 @@ import (
 type UserService interface {
 	FindAll() ([]model.User, error)
 	FindOne(userId int) (*model.User, error)
-	Create(createRequest dto.CreateUserRequest) error
-	Update(userId int, updateRequest dto.UpdateUserRequest) error
 	Delete(userId int) error
-	UpdateUserPassword(userId int, updatePasswordRequest dto.UpdateUserPassword) error
+	// user
+	RegisterUser(registerRequest dto.RegisterUserRequest) error
 	LoginUser(loginRequest dto.UserLoginRequest) (*dto.UserLoginResponse, error)
+	GetUserById(userId int) (*model.User, error)
+	Update(userId int, updateRequest dto.UpdateUserRequest) error
+	UpdateUserPassword(userId int, updatePasswordRequest dto.UpdateUserPassword) error
 }

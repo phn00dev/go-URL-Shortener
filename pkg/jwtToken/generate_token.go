@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt"
+
 )
 
 const SecretKey = "HJGYUDF!DN^Bdd$%asj*_dasdhas$$ash#dasd&%^$@"
@@ -34,7 +35,7 @@ func GenerateToken(id int, username, email string) (string, error) {
 	return tokenString, nil
 }
 
-func ValidateAdminToken(tokenString string) (*Claims, error) {
+func ValidateToken(tokenString string) (*Claims, error) {
 	token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
 		return []byte(SecretKey), nil
 	})

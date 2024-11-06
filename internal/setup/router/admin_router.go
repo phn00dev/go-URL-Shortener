@@ -11,7 +11,6 @@ import (
 
 func AdminRoutes(route *gin.Engine) {
 	adminApiRoute := route.Group("/v1a/api/admin")
-	adminApiRoute.Use(middleware.AuthMiddleware())
 	{
 		// admin auth routes
 		authAdminRoute := adminApiRoute.Group("/auth")
@@ -19,6 +18,7 @@ func AdminRoutes(route *gin.Engine) {
 			authAdminRoute.POST("/login", adminConstructor.AdminHandler.LoginAdmin)
 		}
 		// admin routes
+		adminApiRoute.Use(middleware.AuthMiddleware())
 		adminRoute := adminApiRoute.Group("/admins")
 		{
 			adminRoute.GET("/", adminConstructor.AdminHandler.GetAll)
@@ -32,8 +32,7 @@ func AdminRoutes(route *gin.Engine) {
 		{
 			userRoute.GET("/", userConstructor.UserHandler.GetAll)
 			userRoute.GET("/:userId", userConstructor.UserHandler.GetById)
-			userRoute.POST("/create", userConstructor.UserHandler.Create)
-			userRoute.PUT("/:userId", userConstructor.UserHandler.Update)
+			// userRoute.PUT("/:userId", userConstructor.UserHandler.Update)
 			userRoute.DELETE("/:userId", userConstructor.UserHandler.Delete)
 		}
 		// url routes
