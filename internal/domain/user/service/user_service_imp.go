@@ -21,7 +21,7 @@ func NewUserService(repo repository.UserRepository) UserService {
 	}
 }
 
-func (s userServiceImp) FindAll() ([]model.User, error) {
+func (s userServiceImp) FindAll() ([]dto.AllUserResponse, error) {
 	users, err := s.userRepo.GetAll()
 	if err != nil {
 		return nil, err

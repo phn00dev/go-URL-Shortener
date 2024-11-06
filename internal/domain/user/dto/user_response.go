@@ -17,3 +17,13 @@ func NewUserLoginResponse(user *model.User, accessToken string) *UserLoginRespon
 		AccessToken: accessToken,
 	}
 }
+
+// all user get edilip alnandaky model
+type AllUserResponse struct {
+	ID           int    `json:"id"`
+	Username     string `json:"username"`
+	Email        string `json:"email"`
+	PasswordHash string `json:"-"` // Şifreyi dışarıya göstermemek için
+	CreatedAt    string `json:"created_at"`
+	UrlCount     int    `json:"url_count"` // Burada gorm:"-" olmamalıdır
+}

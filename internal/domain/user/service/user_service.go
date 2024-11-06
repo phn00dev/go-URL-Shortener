@@ -6,7 +6,7 @@ import (
 )
 
 type UserService interface {
-	FindAll() ([]model.User, error)
+	FindAll() ([]dto.AllUserResponse, error)
 	FindOne(userId int) (*model.User, error)
 	Delete(userId int) error
 	// user

@@ -5,6 +5,7 @@ import (
 
 	"gorm.io/gorm"
 
+	"github.com/phn00dev/go-URL-Shortener/internal/domain/user/dto"
 	"github.com/phn00dev/go-URL-Shortener/internal/model"
 
 )
@@ -21,9 +22,16 @@ func NewUserRepository(db *gorm.DB) UserRepository {
 
 func (userRepo userRepositoryImp) GetById(userId int) (*model.User, error) {
 	var user model.User
-	if err := userRepo.db.First(&user, userId).Error; err != nil {
+	if err := userRepo.db.
+		Table("users").
+		Select("users.id, users.username, users.email, TO_CHAR(users.created_at, 'YYYY-MM-DD HH24:MI:SS') as created_at, COALESCE(COUNT(urls.id), 0) AS url_count").
+		Joins("LEFT JOIN urls ON urls.user_id = users.id").
+		Group("users.id").
+		Preload("UserUrls").
+		First(&user, userId).Error; err != nil {
 		return nil, err
 	}
+
 	return &user, nil
 }
 
@@ -43,12 +51,26 @@ func (userRepo userRepositoryImp) GetByUsername(username string) (*model.User, e
 	return &user, nil
 }
 
-func (userRepo userRepositoryImp) GetAll() ([]model.User, error) {
-	var users []model.User
-	if err := userRepo.db.Order("id desc").Find(&users).Error; err != nil {
+func (userRepo userRepositoryImp) GetAll() ([]dto.AllUserResponse, error) {
+	var users []dto.AllUserResponse
+
+	if err := userRepo.db.
+		Table("users").
+		Select("users.id, users.username, users.email, TO_CHAR(users.created_at, 'YYYY-MM-DD HH24:MI:SS') as created_at, COALESCE(COUNT(urls.id), 0) AS url_count").
+		Joins("LEFT JOIN urls ON urls.user_id = users.id").
+		Group("users.id").
+		Order("users.id desc").
+		Find(&users).Error; err != nil {
 		return nil, err
 	}
+
 	return users, nil
+}
+
+// user
+
+func (userRepo userRepositoryImp) Delete(userId int) error {
+	return userRepo.db.Delete(&model.User{}, userId).Error
 }
 
 func (userRepo userRepositoryImp) Create(user model.User) error {
@@ -57,10 +79,6 @@ func (userRepo userRepositoryImp) Create(user model.User) error {
 
 func (userRepo userRepositoryImp) Update(userId int, user model.User) error {
 	return userRepo.db.Where("id=?", userId).Updates(&user).Error
-}
-
-func (userRepo userRepositoryImp) Delete(userId int) error {
-	return userRepo.db.Delete(&model.User{}, userId).Error
 }
 
 func (userRepo userRepositoryImp) UpdateUserPassword(userId int, password string) error {

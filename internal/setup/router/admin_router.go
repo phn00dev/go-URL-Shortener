@@ -32,7 +32,6 @@ func AdminRoutes(route *gin.Engine) {
 		{
 			userRoute.GET("/", userConstructor.UserHandler.GetAll)
 			userRoute.GET("/:userId", userConstructor.UserHandler.GetById)
-			// userRoute.PUT("/:userId", userConstructor.UserHandler.Update)
 			userRoute.DELETE("/:userId", userConstructor.UserHandler.Delete)
 		}
 		// url routes

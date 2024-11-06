@@ -13,7 +13,6 @@ import (
 	"github.com/phn00dev/go-URL-Shortener/internal/model"
 	"github.com/phn00dev/go-URL-Shortener/internal/utils/response"
 	"github.com/phn00dev/go-URL-Shortener/internal/utils/validate"
-
 )
 
 type urlHandlerImp struct {
@@ -45,7 +44,8 @@ func (urlHandler urlHandlerImp) GetOne(c *gin.Context) {
 		response.Error(c, http.StatusInternalServerError, "url not found", err.Error())
 		return
 	}
-	response.Success(c, http.StatusOK, "user url", url)
+	urlResponse := dto.GetOneUserUrlResponse(c, url)
+	response.Success(c, http.StatusOK, "get  url", urlResponse)
 }
 
 func (urlHandler urlHandlerImp) Create(c *gin.Context) {
