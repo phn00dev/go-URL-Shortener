@@ -14,6 +14,11 @@ type UpdateAdminRequest struct {
 	AdminRole string `json:"admin_role" binding:"required" validate:"required"`
 }
 
+type UpdateLoginAdminRequest struct {
+	Username string `json:"username" binding:"min=3,max=50" validate:"omitempty,min=3,max=50"`
+	Email    string `json:"email" binding:"email" validate:"omitempty,email"`
+}
+
 type ChangeAdminPassword struct {
 	OldPassword     string `json:"old_password" validate:"required"`
 	Password        string `json:"password" validate:"required,min=6"`

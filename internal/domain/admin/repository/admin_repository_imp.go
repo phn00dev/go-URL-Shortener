@@ -6,6 +6,7 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/phn00dev/go-URL-Shortener/internal/model"
+
 )
 
 type adminRepositoryImp struct {
@@ -66,7 +67,7 @@ func (adminRepo adminRepositoryImp) GetAdminByUsername(username string) (*model.
 }
 
 func (adminRepo adminRepositoryImp) UpdateAdminPassword(adminId int, password string) error {
-	if err := adminRepo.db.Model(&model.Admin{}).Where("id = ?", adminId).Update("password", password).Error; err != nil {
+	if err := adminRepo.db.Model(&model.Admin{}).Where("id = ?", adminId).Update("password_hash", password).Error; err != nil {
 		return err
 	}
 	return nil

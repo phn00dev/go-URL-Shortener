@@ -8,6 +8,9 @@ type AdminHandler interface {
 	Create(c *gin.Context)
 	Update(c *gin.Context)
 	Delete(c *gin.Context)
-	UpdateAdminPassword(c *gin.Context)
+	// admin login
 	LoginAdmin(c *gin.Context)
+	// update admin data for login admin
+	UpdataAdminData(c *gin.Context)
+	UpdateAdminPassword(c *gin.Context)
 }

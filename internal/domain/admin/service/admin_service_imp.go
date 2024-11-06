@@ -9,7 +9,6 @@ import (
 	"github.com/phn00dev/go-URL-Shortener/internal/model"
 	"github.com/phn00dev/go-URL-Shortener/internal/utils"
 	jwttoken "github.com/phn00dev/go-URL-Shortener/pkg/jwtToken"
-
 )
 
 type adminServiceImp struct {
@@ -123,4 +122,26 @@ func (s adminServiceImp) AdminLogin(loginRequest dto.AdminLoginRequest) (*dto.Ad
 	}
 	loginResponse := dto.NewAdminLoginResponse(admin, accessToken)
 	return loginResponse, nil
+}
+
+func (s adminServiceImp) UpdateAdminData(adminId int, updateAdminData dto.UpdateLoginAdminRequest) error {
+	admin, err := s.adminRepo.GetOneById(adminId)
+	if err != nil {
+		return err
+	}
+	existingAdminEmail, err := s.adminRepo.GetAdminByEmail(updateAdminData.Email)
+	if err == nil && existingAdminEmail.ID != adminId {
+		// Eger email başga admin tarapyndan eýýelenýän bolsa, ýalňyşlyk döretmek
+		return fmt.Errorf("e-mail salgy eýýäm ulanylýar: %s", updateAdminData.Email)
+	}
+
+	existingAdminUsername, err := s.adminRepo.GetAdminByUsername(updateAdminData.Username)
+	if err == nil && existingAdminUsername.ID != adminId {
+		// Eger username başga admin tarapyndan eýýelenýän bolsa, ýalňyşlyk döretmek
+		return fmt.Errorf("username ady eýýäm ulanylýar: %s", updateAdminData.Username)
+	}
+
+	admin.Username = updateAdminData.Username
+	admin.Email = updateAdminData.Email
+	return s.adminRepo.Update(admin.ID, *admin)
 }

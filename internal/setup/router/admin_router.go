@@ -17,8 +17,15 @@ func AdminRoutes(route *gin.Engine) {
 		{
 			authAdminRoute.POST("/login", adminConstructor.AdminHandler.LoginAdmin)
 		}
-		// admin routes
+
 		adminApiRoute.Use(middleware.AuthMiddleware())
+		// admin profile routes
+		adminProfileRoute := adminApiRoute.Group("/admin-profile")
+		{
+			adminProfileRoute.POST("/update-admin-data", adminConstructor.AdminHandler.UpdataAdminData)
+			adminProfileRoute.POST("/update-admin-password", adminConstructor.AdminHandler.UpdateAdminPassword)
+		}
+		// admin routes
 		adminRoute := adminApiRoute.Group("/admins")
 		adminRoute.Use(middleware.SuperAdminMiddleware())
 		{
@@ -28,6 +35,7 @@ func AdminRoutes(route *gin.Engine) {
 			adminRoute.PUT("/:adminId", adminConstructor.AdminHandler.Update)
 			adminRoute.DELETE("/:adminId", adminConstructor.AdminHandler.Delete)
 		}
+
 		// user routes
 		userRoute := adminApiRoute.Group("/users")
 		{

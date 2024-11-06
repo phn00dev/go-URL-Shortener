@@ -116,23 +116,6 @@ func (adminHandler adminHandlerImp) Delete(c *gin.Context) {
 	response.Success(c, http.StatusOK, "Admin deleted successfully", nil)
 }
 
-func (adminHandler adminHandlerImp) UpdateAdminPassword(c *gin.Context) {
-	adminIdStr := c.Param("adminId")
-	adminId, _ := strconv.Atoi(adminIdStr)
-
-	var changePasswordRequest dto.ChangeAdminPassword
-	if err := c.ShouldBindBodyWithJSON(&changePasswordRequest); err != nil {
-		response.Error(c, http.StatusBadRequest, "data parsing error", err.Error())
-		return
-	}
-
-	err := adminHandler.adminService.UpdateAdminPassword(adminId, changePasswordRequest)
-	if err != nil {
-		response.Error(c, http.StatusConflict, "password update failed", err.Error())
-		return
-	}
-	response.Success(c, http.StatusOK, "password updated successfully", nil)
-}
 func (adminHandler adminHandlerImp) LoginAdmin(c *gin.Context) {
 	var adminLoginRequest dto.AdminLoginRequest
 	// Pointer görnüşinde geçiriň: &adminLoginRequest
@@ -152,4 +135,74 @@ func (adminHandler adminHandlerImp) LoginAdmin(c *gin.Context) {
 		return
 	}
 	response.Success(c, http.StatusOK, "admin login successfully", loginResponse)
+}
+
+// update admin data for login admin
+
+func (adminHandler adminHandlerImp) UpdataAdminData(c *gin.Context) {
+	authAdminId, exists := c.Get("id")
+	if !exists {
+		response.Error(c, http.StatusUnauthorized, "error auth", "User not authorized")
+		return
+	}
+
+	authAdminIdInt, ok := authAdminId.(int)
+	if !ok || authAdminIdInt == 0 {
+		response.Error(c, http.StatusUnauthorized, "error auth", "User not authorized")
+		return
+	}
+	var updateAdminData dto.UpdateLoginAdminRequest
+	// body parser
+	if err := c.ShouldBindBodyWithJSON(&updateAdminData); err != nil {
+		response.Error(c, http.StatusBadRequest, "body parser error", err.Error())
+		return
+	}
+
+	// validate data
+	if err := validate.ValidateStruct(updateAdminData); err != nil {
+		response.Error(c, http.StatusBadRequest, "validate error", err.Error())
+		return
+	}
+
+	// update admin data
+	if err := adminHandler.adminService.UpdateAdminData(authAdminIdInt, updateAdminData); err != nil {
+		response.Error(c, http.StatusInternalServerError, "update admin data error", err.Error())
+		return
+	}
+	// success respponse
+	response.Success(c, http.StatusOK, "admin data updated successfully", nil)
+}
+
+func (adminHandler adminHandlerImp) UpdateAdminPassword(c *gin.Context) {
+	authAdminId, exists := c.Get("id")
+	if !exists {
+		response.Error(c, http.StatusUnauthorized, "error auth", "User not authorized")
+		return
+	}
+
+	authAdminIdInt, ok := authAdminId.(int)
+	if !ok || authAdminIdInt == 0 {
+		response.Error(c, http.StatusUnauthorized, "error auth", "User not authorized")
+		return
+	}
+
+	var changeAdminPassword dto.ChangeAdminPassword
+	// body parser
+	if err := c.ShouldBindBodyWithJSON(&changeAdminPassword); err != nil {
+		response.Error(c, http.StatusBadRequest, "body parser error", err.Error())
+		return
+	}
+
+	// validate data
+	if err := validate.ValidateStruct(changeAdminPassword); err != nil {
+		response.Error(c, http.StatusBadRequest, "validate error", err.Error())
+		return
+	}
+	// change admin password service
+	if err := adminHandler.adminService.UpdateAdminPassword(authAdminIdInt, changeAdminPassword); err != nil {
+		response.Error(c, http.StatusInternalServerError, "update password error", err.Error())
+		return
+	}
+	// success respponse
+	response.Success(c, http.StatusOK, "admin password updated successfully", nil)
 }
